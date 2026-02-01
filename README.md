@@ -1,173 +1,134 @@
-![](https://philihp.com/openskill.js/logo.png)
 
-[![Version](https://img.shields.io/npm/v/openskill)](https://www.npmjs.com/package/openskill)
-[![tests](https://github.com/philihp/openskill.js/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/philihp/openskill.js/actions/workflows/tests.yml)
-[![Coverage Status](https://coveralls.io/repos/github/philihp/openskill.js/badge.svg?branch=main&force=reload)](https://coveralls.io/github/philihp/openskill.js?branch=main)
-![Downloads](https://img.shields.io/npm/dt/openskill)
-![License](https://img.shields.io/npm/l/openskill)
+# Musrank
 
-Javascript implementation of Weng-Lin Rating, as described at https://www.csie.ntu.edu.tw/~cjlin/papers/online_ranking/online_journal.pdf
+[![Version](https://img.shields.io/npm/v/musrank)](https://www.npmjs.com/package/musrank)
+[![tests](https://github.com/ordago-app/musrank/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/ordago-app/musrank/actions/workflows/tests.yml)
+[![Coverage Status](https://coveralls.io/repos/github/ordago-app/musrank/badge.svg?branch=main&force=reload)](https://coveralls.io/github/ordago-app/musrank?branch=main)
+![Downloads](https://img.shields.io/npm/dt/musrank)
+![License](https://img.shields.io/npm/l/musrank)
 
-## Speed
-
-Up to 20x faster than TrueSkill!
-
-| Model                            | Speed (higher is better) | Variance |         Samples |
-| -------------------------------- | -----------------------: | -------: | --------------: |
-| Openskill/bradleyTerryFull       |           62,643 ops/sec |   ±1.09% | 91 runs sampled |
-| Openskill/bradleyTerryPart       |           40,152 ops/sec |   ±0.73% | 91 runs sampled |
-| Openskill/thurstoneMostellerFull |           59,336 ops/sec |   ±0.74% | 93 runs sampled |
-| Openskill/thurstoneMostellerPart |           38,666 ops/sec |   ±1.21% | 92 runs sampled |
-| Openskill/plackettLuce           |           23,492 ops/sec |   ±0.26% | 91 runs sampled |
-| TrueSkill                        |            2,962 ops/sec |   ±3.23% | 82 runs sampled |
-
-See [this post](https://philihp.com/2020/openskill.html) for more.
+MusRank is a skill-rating system for Mus that separates **match length noise** from **score margin signal**. It keeps the Weng-Lin / TrueSkill-style core, but replaces the observation model so Mus outcomes behave the way they feel in real play.
 
 ## Installation
 
-Add `openskill` to your list of dependencies in `package.json`:
-
 ```bash
-npm install --save openskill
+npm install --save musrank
 ```
 
-## Usage
-
-If you're writing ES6, you can `import`, otherwise use CommonJS's `require`
+## Quick start
 
 ```js
-import { rating, rate, ordinal } from 'openskill'
+import { rating, rate } from 'musrank'
+
+const a1 = rating()
+const a2 = rating()
+const b1 = rating()
+const b2 = rating()
+
+const [[a1p, a2p], [b1p, b2p]] = rate(
+  [[a1, a2], [b1, b2]],
+  {
+    // Mus match context
+    juegos: 10,     // L (points to win)
+    scoreGap: 3,    // g (point difference)
+  }
+)
 ```
 
-Ratings are kept as an object which represent a gaussian curve, with properties where `mu` represents the _mean_, and `sigma` represents the spread or standard deviation. Create these with:
+## The model: three layers of uncertainty
 
-```js
-> const { rating } = require('openskill')
-> const a1 = rating()
-{ mu: 25, sigma: 8.333333333333334 }
-> const a2 = rating({ mu: 32.444, sigma: 5.123 })
-{ mu: 32.444, sigma: 5.123 }
-> const b1 = rating({ mu: 43.381, sigma: 2.421 })
-{ mu: 43.381, sigma: 2.421 }
-> const b2 = rating({ mu: 25.188, sigma: 6.211 })
-{ mu: 25.188, sigma: 6.211 }
+### Layer 1 — Hand-level randomness (β₀)
+
+Each hand has:
+
+- card randomness
+- bidding variance
+
+We model this base noise as **β₀**. Larger β₀ means outcomes are blurrier; smaller β₀ means skill dominates.
+
+### Layer 2 — Match aggregation (β(L))
+
+Mus is played to **L juegos** (points). More games average out randomness, so the match-level noise shrinks with L.
+
+Conceptually:
+
+```
+beta(L) = beta0 / sqrt(L)
 ```
 
-If `a1` and `a2` are on a team, and wins against a team of `b1` and `b2`, send this into `rate`
+Or with a reference match length:
 
-```js
-> const { rate } = require('openskill')
-> const [[x1, x2], [y1, y2]] = rate([[a1, a2], [b1, b2]])
-[
-  [
-    { mu: 28.67..., sigma: 8.07...},
-    { mu: 33.83..., sigma: 5.06...}
-  ],
-  [
-    { mu: 43.07..., sigma: 2.42...},
-    { mu: 23.15..., sigma: 6.14...}
-  ]
-]
+```
+beta(L) = beta0 * (Lref / L) ^ alpha
 ```
 
-Teams can be asymmetric, too! For example, a game like [Axis and Allies](https://en.wikipedia.org/wiki/Axis_%26_Allies) can be 3 vs 2, and this can be modeled here.
+Where **L is the number of juegos**. Short matches are noisy; long matches are reliable.
 
-### Ranking
+**Example (intuition):** if beta(10) = 1.0
 
-When displaying a rating, or sorting a list of ratings, you can use `ordinal`
+- L = 2 → beta(2) ≈ 2.24 (chaotic, weak evidence)
+- L = 4 → beta(4) ≈ 1.58 (still swingy)
+- L = 20 → beta(20) ≈ 0.71 (stable, decisive)
 
-```js
-> const { ordinal } = require('openskill')
-> ordinal({ mu: 43.07, sigma: 2.42})
-35.81
+### Layer 3 — Margin → performance (f(g))
+
+The observed score gap `g` is in points, but the rating model uses performance units. We define a **measurement mapping**:
+
+```
+d = f(g)
 ```
 
-By default, this returns `mu - 3*sigma`, showing a rating for which there's a [99.7%](https://en.wikipedia.org/wiki/68–95–99.7_rule) likelihood the player's true rating is higher, so with early games, a player's ordinal rating will usually go up and could go up even if that player loses.
+Key idea: **small gaps are noisy, large gaps saturate information**. Good conceptual choices are:
 
-### Artificial Ranking
-
-If your teams are listed in one order but your ranking is in a different order, for convenience you can specify a `ranks` option, such as
-
-```js
-> const a1 = b1 = c1 = d1 = rating()
-> const [[a2], [b2], [c2], [d2]] = rate([[a1], [b1], [c1], [d1]], {
-    rank: [4, 1, 3, 2] // 🐌 🥇 🥉 🥈
-  })
-[
-  [{ mu: 20.963, sigma: 8.084 }], // 🐌
-  [{ mu: 27.795, sigma: 8.263 }], // 🥇
-  [{ mu: 24.689, sigma: 8.084 }], // 🥉
-  [{ mu: 26.553, sigma: 8.179 }], // 🥈
-]
+```
+d = c * tanh(g / g0)
+d = c * log(1 + g)
+d = c * sqrt(g)
 ```
 
-It's assumed that the lower ranks are better (wins), while higher ranks are worse (losses). You can provide a `score` instead, where lower is worse and higher is better. These can just be raw scores from the game, if you want.
+Where:
 
-Ties should have either equivalent rank or score.
+- `c` sets the performance scale (how big a decisive win is)
+- `g0` controls saturation (when additional points stop adding much information)
 
-```js
-> const a1 = b1 = c1 = d1 = rating()
-> const [[a2], [b2], [c2], [d2]] = rate([[a1], [b1], [c1], [d1]], {
-    score: [37, 19, 37, 42] // 🥈 🐌 🥈 🥇
-  })
-[
-  [{ mu: 24.689, sigma: 8.179 }], // 🥈
-  [{ mu: 22.826, sigma: 8.179 }], // 🐌
-  [{ mu: 24.689, sigma: 8.179 }], // 🥈
-  [{ mu: 27.795, sigma: 8.263 }], // 🥇
-]
-```
+## What “more β” vs “less β” means
 
-### Predicting Winners
+- **More β** → more chaos. Upsets are common, a win provides weak evidence.
+- **Less β** → more determinism. Upsets are rare, a win is strong evidence.
 
-For a given match of any number of teams, using `predictWin` you can find a relative
-odds that each of those teams will win.
+In Mus terms: **short matches → high β**, **long matches → low β**.
 
-```js
-> const { predictWin } = require('openskill')
-> const a1 = rating()
-> const a2 = rating({mu:33.564, sigma:1.123})
-> const predictions = predictWin([[a1], [a2]])
-[ 0.45110899943132493, 0.5488910005686751 ]
-> predictions[0] + predictions[1]
-1
-```
+## How does `d` affect rating change? Is it linear?
 
-### Predicting Draws
+No. `d` does **not** multiply Elo. It changes the **likelihood**, and the update is Bayesian and **nonlinear**.
 
-Also for a given match, using `predictDraw` you can get the relative chance that these
-teams will draw. The number returned here should be treated as relative to other matches, but in reality the odds of an actual legal draw will be impacted by some meta-function based on the rules of the game.
+Think of it like this:
 
-```js
-> const { predictDraw } = require('openskill')
-> const prediction = predictDraw([[a1], [a2]])
-0.09025530533015186
-```
+- `f(g)` defines the **signal** (what you observed)
+- `beta(L)` defines the **noise** (how much to trust it)
 
-This can be used in a similar way that you might use _quality_ in TrueSkill if you were optimizing a matchmaking system, or optimizing an tournament tree structure for exciting finals and semi-finals such as in the NCAA.
+So the same gap gives:
 
-### Alternative Models
+- a **small update** in a short match (high β)
+- a **large update** in a long match (low β)
 
-By default, we use a Plackett-Luce model, which is probably good enough for most cases. When speed is an issue, the library runs faster with other models
+Large margins saturate naturally, so blowouts do **not** produce runaway updates. This is exactly the behavior Mus needs.
 
-```js
-import { bradleyTerryFull } from 'openskill/models'
-const [[a2], [b2]] = rate([[a1], [b1]], {
-  model: bradleyTerryFull,
-})
-```
+## Defaults you’ll choose later
 
-- Bradley-Terry rating models follow a logistic distribution over a player's skill, similar to Glicko.
-- Thurstone-Mosteller rating models follow a gaussian distribution, similar to TrueSkill. Gaussian CDF/PDF functions differ in implementation from system to system (they're all just chebyshev approximations anyway). The accuracy of this model isn't usually as great either, but tuning this with an alternative gamma function can improve the accuracy if you really want to get into it.
-- Full pairing should have more accurate ratings over partial pairing, however in high _k_ games (like a 100+ person marathon race), Bradley-Terry and Thurstone-Mosteller models need to do a calculation of joint probability which involves is a _k_-1 dimensional integration, which is computationally expensive. Use partial pairing in this case, where players only change based on their neighbors.
-- Plackett-Luce (**default**) is a generalized Bradley-Terry model for _k_ &GreaterEqual; 3 teams. It scales best.
+These are the three core knobs:
 
-## Implementations in other languages
+1. **β₀** — base hand randomness
+2. **σ₀** — prior uncertainty for new players
+3. **f(g)** — score gap → performance mapping
 
-- Python https://github.com/OpenDebates/openskill.py
-- Java https://github.com/pocketcombats/openskill-java
-- Kotlin https://github.com/brezinajn/openskill.kt
-- Elixir https://github.com/philihp/openskill.ex
-- Lua https://github.com/bstummer/openskill.lua
-- Google Sheets https://docs.google.com/spreadsheets/d/12TA1ZG_qpBi4kDTclaOGB4sd5uJK8w-0My6puMd2-CY/edit?usp=sharing
-- Google Apps Script https://github.com/haya14busa/gas-openskill
+Rule of thumb: start with `sigma0 ≈ 1–2 × beta(10)` so new players can move meaningfully after a few matches.
+
+## Why this approach fits Mus
+
+- Short matches are noisy by nature — β(L) encodes that.
+- Score gaps add information but saturate — f(g) encodes that.
+- Ratings update fast for new players, slowly for established ones — σ₀ encodes that.
+
+That separation keeps the math principled and lets Mus behave like Mus.
+

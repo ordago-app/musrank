@@ -1,6 +1,6 @@
 {
-  "name": "openskill",
-  "version": "4.1.1-rc0",
+  "name": "musrank",
+  "version": "0.1.0",
   "description": "Weng-Lin Bayesian approximation method for online skill-ranking.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -36,19 +36,20 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/philihp/openskill.js.git"
+    "url": "git+https://github.com/ordago-app/musrank.git"
   },
   "keywords": [
+    "mus",
     "ranking",
     "trueskill",
     "bayesian"
   ],
-  "author": "Philihp Busby <philihp@gmail.com>",
+  "author": "Álvaro Francisco Gil, Jaime Rubio Diaz",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/philihp/openskill.js/issues"
+    "url": "https://github.com/ordago-app/musrank/issues"
   },
-  "homepage": "https://github.com/philihp/openskill.js#readme",
+  "homepage": "https://github.com/ordago-app/musrank#readme",
   "devDependencies": {
     "@eslint/js": "9.39.2",
     "@philihp/prettier-config": "1.0.0",

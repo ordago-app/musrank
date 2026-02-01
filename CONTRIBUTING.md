@@ -13,8 +13,8 @@ If there's a feature or enhancement you'd like to add, please feel free to creat
 ## Setup
 
 ```bash
-git clone git@github.com:philihp/openskill.js.git
-cd openskill.js
+git clone git@github.com:ordago-app/musrank.git
+cd musrank
 npm install
 ```
 

@@ -13,18 +13,18 @@ describe('rate', () => {
   const y1 = rating({ mu: 25, sigma: 25 / 3.0 })
   const z1 = rating({ mu: 30, sigma: 25 / 3.0 })
 
-  it('rate accepts and runs a placket-luce model by default', () => {
+  it('rate defaults to Thurstone-Mosteller full', () => {
     expect.assertions(1)
     const [[a2], [b2], [c2], [d2]] = rate([[a1], [b1], [c1], [d1]])
     expect([[a2], [b2], [c2], [d2]]).toStrictEqual([
-      [{ mu: 30.209971908310553, sigma: 4.764898977359521 }],
-      [{ mu: 27.64460833689499, sigma: 4.882789305097372 }],
-      [{ mu: 17.403586731283518, sigma: 6.100723440599442 }],
-      [{ mu: 19.214790707434826, sigma: 7.8542613981643985 }],
+      [{ mu: 32.486796964752294, sigma: 4.3777704130260116 }],
+      [{ mu: 27.50365223914957, sigma: 4.439639481033075 }],
+      [{ mu: 19.02638314298227, sigma: 5.316854971297541 }],
+      [{ mu: 9.78886691324358, sigma: 4.444994542843567 }],
     ])
   })
 
-  it('rate accepts and runs a placket-luce model with tau', () => {
+  it('rate defaults to Thurstone-Mosteller full with tau', () => {
     expect.assertions(1)
     const a1 = rating({ mu: 29.182, sigma: 4.782 })
     const b1 = rating({ mu: 27.174, sigma: 4.922 })
@@ -34,14 +34,14 @@ describe('rate', () => {
     const [[a2], [b2], [c2], [d2]] = rate([[a1], [b1], [c1], [d1]], { tau: 0.01 })
 
     expect([[a2], [b2], [c2], [d2]]).toStrictEqual([
-      [{ mu: 30.20997558824299, sigma: 4.764909330988368 }],
-      [{ mu: 27.64461002009721, sigma: 4.882799245921361 }],
-      [{ mu: 17.403587237635527, sigma: 6.100731158882956 }],
-      [{ mu: 19.21478808745494, sigma: 7.854267281042293 }],
+      [{ mu: 32.486809592506816, sigma: 4.377778415425312 }],
+      [{ mu: 27.503654673117328, sigma: 4.43964696768637 }],
+      [{ mu: 19.026383971689544, sigma: 5.316860086641376 }],
+      [{ mu: 9.788856927852024, sigma: 4.444998132425435 }],
     ])
   })
 
-  it('rate accepts and runs a placket-luce model with tau and prevent_sigma_increase', () => {
+  it('rate defaults to Thurstone-Mosteller full with tau and prevent_sigma_increase', () => {
     expect.assertions(2)
     const a1 = rating({ mu: 6.672, sigma: 0.0001 })
     const b1 = rating({ mu: 29.182, sigma: 4.782 })
@@ -50,12 +50,12 @@ describe('rate', () => {
 
     expect(a2.sigma).toBeLessThanOrEqual(a1.sigma)
     expect([[a2], [b2]]).toStrictEqual([
-      [{ mu: 6.672012533190158, sigma: 0.0001 }],
-      [{ mu: 26.316243774876106, sigma: 4.7540633621019 }],
+      [{ mu: 6.672042853260298, sigma: 0.0001 }],
+      [{ mu: 19.383457417440766, sigma: 4.189951822398248 }],
     ])
   })
 
-  it('rate accepts and runs a placket-luce model by default for teams', () => {
+  it('rate defaults to Thurstone-Mosteller full for teams', () => {
     const a1 = rating({ mu: 29.182, sigma: 4.782 })
     const b1 = rating({ mu: 27.174, sigma: 4.922 })
     const c1 = rating({ mu: 16.672, sigma: 6.217 })
@@ -67,14 +67,14 @@ describe('rate', () => {
     ])
 
     expect([a2, b2, c2, d2]).toStrictEqual([
-      { mu: 29.607218266047376, sigma: 4.754597315295896 },
-      { mu: 27.624480490655575, sigma: 4.89211428863373 },
-      { mu: 15.953288649990139, sigma: 6.125357588584119 },
-      { mu: 23.708690706816785, sigma: 8.111298027437888 },
+      { mu: 29.620020804959164, sigma: 4.731418094694093 },
+      { mu: 27.63804362862758, sigma: 4.866826659422295 },
+      { mu: 15.931649574814996, sigma: 6.047175047517385 },
+      { mu: 23.66981176206495, sigma: 7.919659505783864 },
     ])
   })
 
-  it('rate accepts and runs a placket-luce model by default for teams with tau', () => {
+  it('rate defaults to Thurstone-Mosteller full for teams with tau', () => {
     const a1 = rating({ mu: 29.182, sigma: 4.782 })
     const b1 = rating({ mu: 27.174, sigma: 4.922 })
     const c1 = rating({ mu: 16.672, sigma: 6.217 })
@@ -89,14 +89,14 @@ describe('rate', () => {
     )
 
     expect([a2, b2, c2, d2]).toStrictEqual([
-      { mu: 29.60722003260825, sigma: 4.754607604502581 },
-      { mu: 27.624482251695827, sigma: 4.892124276331747 },
-      { mu: 15.953286947567106, sigma: 6.1253654293947335 },
-      { mu: 23.708689129525133, sigma: 8.111303923213725 },
+      { mu: 29.620022912613546, sigma: 4.731428222255712 },
+      { mu: 27.638045747699532, sigma: 4.866836480075812 },
+      { mu: 15.9316473345129, sigma: 6.047182646923513 },
+      { mu: 23.66980926297036, sigma: 7.919665144352448 },
     ])
   })
 
-  it('rate accepts and runs a placket-luce model by default for teams with tau and prevent_sigma_increase', () => {
+  it('rate defaults to Thurstone-Mosteller full for teams with tau and prevent_sigma_increase', () => {
     const a1 = rating({ mu: 9.182, sigma: 0.0001 })
     const b1 = rating({ mu: 27.174, sigma: 4.922 })
     const c1 = rating({ mu: 16.672, sigma: 6.217 })
@@ -113,10 +113,10 @@ describe('rate', () => {
     expect(a2.sigma).toBeLessThanOrEqual(a1.sigma)
 
     expect([a2, b2, c2, d2]).toStrictEqual([
-      { mu: 9.182004653636957, sigma: 0.0001 },
-      { mu: 28.301285923165363, sigma: 4.889318394468611 },
-      { mu: 14.87349383521136, sigma: 6.076727029758966 },
-      { mu: 21.768626152890867, sigma: 7.992333183226455 },
+      { mu: 9.182008332694988, sigma: 0.0001 },
+      { mu: 29.192492170486062, sigma: 4.8236118204756915 },
+      { mu: 13.451636348156313, sigma: 5.787501820111957 },
+      { mu: 19.21397652869793, sigma: 7.266380551070351 },
     ])
   })
 
@@ -126,8 +126,8 @@ describe('rate', () => {
       rank: [2, 1],
     })
     expect([winner, loser]).toStrictEqual([
-      { mu: 27.63523138347365, sigma: 8.065506316323548 },
-      { mu: 22.36476861652635, sigma: 8.065506316323548 },
+      { mu: 29.20524620886059, sigma: 7.632833464033909 },
+      { mu: 20.79475379113941, sigma: 7.632833464033909 },
     ])
   })
 
@@ -137,8 +137,8 @@ describe('rate', () => {
       rank: [1, 2],
     })
     expect([winner, loser]).toStrictEqual([
-      { mu: 22.36476861652635, sigma: 8.065506316323548 },
-      { mu: 27.63523138347365, sigma: 8.065506316323548 },
+      { mu: 20.79475379113941, sigma: 7.632833464033909 },
+      { mu: 29.20524620886059, sigma: 7.632833464033909 },
     ])
   })
 
@@ -148,10 +148,10 @@ describe('rate', () => {
       rank: [2, 1, 4, 3],
     })
     expect([a, b, c, d]).toStrictEqual([
-      { mu: 26.552824984374855, sigma: 8.179213704945203 },
-      { mu: 27.795084971874736, sigma: 8.263160757613477 },
-      { mu: 20.96265504062538, sigma: 8.083731307186588 },
-      { mu: 24.68943500312503, sigma: 8.083731307186588 },
+      { mu: 29.20524620886059, sigma: 5.99095578185474 },
+      { mu: 37.61573862658177, sigma: 5.99095578185474 },
+      { mu: 12.38426137341823, sigma: 5.99095578185474 },
+      { mu: 20.79475379113941, sigma: 5.99095578185474 },
     ])
   })
 
@@ -161,10 +161,10 @@ describe('rate', () => {
       rank: [1, 3, 4, 2],
     })
     expect([w2, x2, y2, z2]).toStrictEqual([
-      { mu: 18.13094482387197, sigma: 8.283124738447958 },
-      { mu: 20.40517319790051, sigma: 8.107463101775272 },
-      { mu: 20.65608164139383, sigma: 8.082178279446465 },
-      { mu: 30.80780033683369, sigma: 8.154697408620104 },
+      { mu: 36.22354829083865, sigma: 5.392210330909183 },
+      { mu: 17.96861741590117, sigma: 6.058705459358724 },
+      { mu: 9.384500238797685, sigma: 5.816247046104276 },
+      { mu: 26.423334054462494, sigma: 6.1453034154298845 },
     ])
   })
 
@@ -181,12 +181,12 @@ describe('rate', () => {
       }
     )
     expect([a2, b2, c2, d2, e2, f2]).toStrictEqual([
-      { mu: 27.857928218465247, sigma: 4.743791738484319 },
-      { mu: 27.99071775460834, sigma: 4.901007097140011 },
-      { mu: 17.60695098907354, sigma: 6.140737155130899 },
-      { mu: 20.979038689398703, sigma: 8.129445198549202 },
-      { mu: 27.341134074194173, sigma: 8.231039243636156 },
-      { mu: 26.679827236407125, sigma: 8.148750467726549 },
+      { mu: 25.760829241958636, sigma: 4.556793004768385 },
+      { mu: 29.279942076509506, sigma: 4.7276784948763 },
+      { mu: 19.094633587626873, sigma: 5.772576386720645 },
+      { mu: 14.610536643942673, sigma: 7.074501427262503 },
+      { mu: 31.036715530887392, sigma: 7.350958149411673 },
+      { mu: 29.352747825169935, sigma: 7.227965921441846 },
     ])
   })
 
@@ -199,9 +199,9 @@ describe('rate', () => {
       rank: [1, 2, 2],
     })
     expect([x, y, z]).toStrictEqual([
-      { mu: 11.942833056030613, sigma: 7.926463661123746 },
-      { mu: 2.938193791485662, sigma: 9.65347573412201 },
-      { mu: -1.4023734358082325, sigma: 11.323360667700934 },
+      { mu: 14.466901682929192, sigma: 7.309475064989195 },
+      { mu: -0.9553732570007618, sigma: 7.66793278749967 },
+      { mu: -1.474791296509586, sigma: 7.700570345110398 },
     ])
   })
 
@@ -225,10 +225,10 @@ describe('rate', () => {
       rank: [1, 1, 1, 1],
     })
     expect([a, b, c, d]).toStrictEqual([
-      { mu: 25, sigma: 8.263160757613477 },
-      { mu: 25, sigma: 8.263160757613477 },
-      { mu: 25, sigma: 8.263160757613477 },
-      { mu: 25, sigma: 8.263160757613477 },
+      { mu: 25.00012, sigma: 4.059279063539745 },
+      { mu: 25.00012, sigma: 4.059279063539745 },
+      { mu: 25.00012, sigma: 4.059279063539745 },
+      { mu: 25.00012, sigma: 4.059279063539745 },
     ])
   })
 
@@ -238,10 +238,10 @@ describe('rate', () => {
       rank: [2, 4, 2, 1],
     })
     expect([w2, x2, y2, z2]).toStrictEqual([
-      { mu: 15.340046366255285, sigma: 8.21273604193863 },
-      { mu: 18.007807436399276, sigma: 8.188629384105589 },
-      { mu: 24.25804790911316, sigma: 8.166514496319483 },
-      { mu: 32.39409828823228, sigma: 8.247276990243211 },
+      { mu: 23.295143213636926, sigma: 5.796048337014361 },
+      { mu: 9.39271644720373, sigma: 6.293864606087043 },
+      { mu: 21.00004, sigma: 5.71824839759255 },
+      { mu: 36.31210033915934, sigma: 6.805746317721251 },
     ])
   })
 
@@ -265,10 +265,35 @@ describe('rate', () => {
       score: [1, 1, 1],
     })
     expect([x2, y2, z2]).toStrictEqual([
-      { mu: 25, sigma: 8.204837030780652 },
-      { mu: 25, sigma: 8.204837030780652 },
-      { mu: 25, sigma: 8.204837030780652 },
+      { mu: 25.00008, sigma: 5.842372163080926 },
+      { mu: 25.00008, sigma: 5.842372163080926 },
+      { mu: 25.00008, sigma: 5.842372163080926 },
     ])
+  })
+
+  it('supports score transforms', () => {
+    expect.assertions(6)
+    const base = { model: thurstoneMostellerFull, score: [10, 5], scoreScale: 1 }
+    const [[logWinner], [logLoser]] = rate([[rating()], [rating()]], {
+      ...base,
+      scoreTransform: 'log',
+    })
+    const [[sqrtWinner], [sqrtLoser]] = rate([[rating()], [rating()]], {
+      ...base,
+      scoreTransform: 'sqrt',
+    })
+    const [[tanhWinner], [tanhLoser]] = rate([[rating()], [rating()]], {
+      ...base,
+      scoreTransform: 'tanh',
+      scoreSaturation: 6,
+    })
+
+    expect(logWinner.mu).toBeCloseTo(25)
+    expect(logLoser.mu).toBeCloseTo(24.283296212, 6)
+    expect(sqrtWinner.mu).toBeCloseTo(25)
+    expect(sqrtLoser.mu).toBeCloseTo(24.105572809, 6)
+    expect(tanhWinner.mu).toBeCloseTo(25)
+    expect(tanhLoser.mu).toBeCloseTo(24.727095284, 6)
   })
 
   it('accepts weights for partial play', () => {
@@ -281,7 +306,7 @@ describe('rate', () => {
         ],
         {
           // This is here to demonstrate how to send these in, although
-          // the default Plackett-Luce doesn't care.
+          // the default Thurstone-Mosteller doesn't care.
           // TODO: example with a custom model which takes this into account.
           weight: [
             [0.9, 1],
@@ -301,8 +326,8 @@ describe('rate', () => {
     })
 
     expect([winner, loser]).toStrictEqual([
-      { mu: 25.624880438870754, sigma: 2.9879993738476953 },
-      { mu: 24.375119561129246, sigma: 2.9879993738476953 },
+      { mu: 25.997175818035053, sigma: 2.945814935785893 },
+      { mu: 24.002824181964947, sigma: 2.945814935785893 },
     ])
   })
 
@@ -316,8 +341,8 @@ describe('rate', () => {
     })
 
     expect([winner, loser]).toStrictEqual([
-      { mu: 40.00032667136128, sigma: 3 },
-      { mu: -20.000326671361275, sigma: 3 },
+      { mu: 40, sigma: 3 },
+      { mu: -20, sigma: 3 },
     ])
   })
 
@@ -331,8 +356,8 @@ describe('rate', () => {
     })
 
     expect([winner, loser]).toStrictEqual([
-      { mu: 40.00032667136128, sigma: 3 },
-      { mu: -20.000326671361275, sigma: 3 },
+      { mu: 40, sigma: 3 },
+      { mu: -20, sigma: 3 },
     ])
   })
 })

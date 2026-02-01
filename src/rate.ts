@@ -3,11 +3,11 @@ import { unwind } from 'sort-unwind'
 
 import { Rating, Options, Team } from './types'
 import constants from './constants'
-import { plackettLuce } from './models'
+import { thurstoneMostellerFull } from './models'
 
 const rate = (teams: Team[], options: Options = {}): Team[] => {
   const { LIMIT_SIGMA, TAU } = constants(options)
-  const { model = plackettLuce } = options
+  const { model = thurstoneMostellerFull } = options
   let processedTeams = teams
 
   // if tau is provided, use additive dynamics factor to prevent sigma from dropping too low.
@@ -26,9 +26,11 @@ const rate = (teams: Team[], options: Options = {}): Team[] => {
   const rank = options.rank ?? options.score?.map((points) => -points) ?? range(1, teams.length + 1)
 
   const [orderedTeams, tenet] = unwind(rank, processedTeams)
+  const [orderedScore] = options.score ? unwind(rank, options.score) : [undefined]
   const newRatings = model(orderedTeams, {
     ...options,
     rank: sortBy(identity, rank),
+    score: orderedScore,
   })
   let [reorderedTeams] = unwind(tenet, newRatings)
 

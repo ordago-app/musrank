@@ -1,7 +1,7 @@
 ### External functions
 
 - `src/rating` - creates a rating.
-- `src/rate` - takes in a list of teams, which is a list of ratings, perhaps a model (by default it uses Plackett-Luce), and runs ratings on them. **This is a good place to start**
+- `src/rate` - takes in a list of teams, which is a list of ratings, perhaps a model (by default it uses Thurstone-Mosteller Full), and runs ratings on them. **This is a good place to start**
 - `src/ordinal` - converts a rating into something people can sort ratings by.
 
 ### Internal functions

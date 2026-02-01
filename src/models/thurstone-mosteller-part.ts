@@ -1,5 +1,5 @@
 import { zip } from 'ramda'
-import util, { ladderPairs } from '../util'
+import util, { ladderPairs, scoreToPerformance } from '../util'
 import { w, v, vt, wt } from '../statistics'
 import constants from '../constants'
 import { Rating, Options, Model } from '../types'
@@ -7,17 +7,31 @@ import { Rating, Options, Model } from '../types'
 const model: Model = (game: Rating[][], options: Options = {}) => {
   const { TWOBETASQ, EPSILON } = constants(options)
   const { teamRating, gamma } = util(options)
+  const toPerformance = scoreToPerformance(options)
   const teamRatings = teamRating(game)
-  const adjacentTeams = ladderPairs(teamRatings)
+  const scores = options.score
+  const indexedTeamRatings = teamRatings.map((teamRating, index) => [teamRating, index] as const)
+  const adjacentTeams = ladderPairs(indexedTeamRatings)
 
-  return zip(teamRatings, adjacentTeams).map(([iTeamRating, iAdjacents]) => {
+  return zip(indexedTeamRatings, adjacentTeams).map(([iIndexed, iAdjacents]) => {
+    const [iTeamRating, iIndex] = iIndexed
     const [iMu, iSigmaSq, iTeam, iRank] = iTeamRating
     const [iOmega, iDelta] = iAdjacents.reduce(
-      ([omega, delta], [qMu, qSigmaSq, _qTeam, qRank]) => {
+      ([omega, delta], [qTeamRating, qIndex]) => {
+        const [qMu, qSigmaSq, _qTeam, qRank] = qTeamRating
         const ciq = 2 * Math.sqrt(iSigmaSq + qSigmaSq + TWOBETASQ)
         const deltaMu = (iMu - qMu) / ciq
         const sigSqToCiq = iSigmaSq / ciq
-        const iGamma = gamma(ciq, teamRatings.length, ...iTeamRating)
+        const iGamma = gamma(ciq, teamRatings.length, iMu, iSigmaSq, iTeam, iRank)
+
+        if (toPerformance && scores) {
+          const gap = (scores[iIndex] ?? 0) - (scores[qIndex] ?? 0)
+          const gapSign = gap === 0 ? 0 : gap > 0 ? 1 : -1
+          const performanceGap = gapSign === 0 ? 0 : toPerformance(Math.abs(gap), options) * gapSign
+          const residual = performanceGap - (iMu - qMu)
+          const vMargin = residual / ciq
+          return [omega + sigSqToCiq * vMargin, delta + (iGamma * sigSqToCiq) / ciq]
+        }
 
         if (qRank === iRank) {
           return [
