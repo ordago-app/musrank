@@ -1,13 +1,15 @@
-import { rate, rating } from '..'
+import { rating } from '..'
+import rate from '../rate'
 import thurstoneMostellerFull from '../models/thurstone-mosteller-full'
 
 describe('rate', () => {
   const a1 = rating({ mu: 29.182, sigma: 4.782 })
   const b1 = rating({ mu: 27.174, sigma: 4.922 })
   const c1 = rating({ mu: 16.672, sigma: 6.217 })
-  const d1 = rating()
-  const e1 = rating()
-  const f1 = rating()
+  const defaultRating = () => rating({ mu: 25, sigma: 25 / 3 })
+  const d1 = defaultRating()
+  const e1 = defaultRating()
+  const f1 = defaultRating()
   const w1 = rating({ mu: 15, sigma: 25 / 3.0 })
   const x1 = rating({ mu: 20, sigma: 25 / 3.0 })
   const y1 = rating({ mu: 25, sigma: 25 / 3.0 })
@@ -29,7 +31,7 @@ describe('rate', () => {
     const a1 = rating({ mu: 29.182, sigma: 4.782 })
     const b1 = rating({ mu: 27.174, sigma: 4.922 })
     const c1 = rating({ mu: 16.672, sigma: 6.217 })
-    const d1 = rating()
+    const d1 = defaultRating()
 
     const [[a2], [b2], [c2], [d2]] = rate([[a1], [b1], [c1], [d1]], { tau: 0.01 })
 
@@ -41,12 +43,12 @@ describe('rate', () => {
     ])
   })
 
-  it('rate defaults to Thurstone-Mosteller full with tau and prevent_sigma_increase', () => {
+  it('rate defaults to Thurstone-Mosteller full with tau and limit_sigma', () => {
     expect.assertions(2)
     const a1 = rating({ mu: 6.672, sigma: 0.0001 })
     const b1 = rating({ mu: 29.182, sigma: 4.782 })
 
-    const [[a2], [b2]] = rate([[a1], [b1]], { tau: 0.01, preventSigmaIncrease: true })
+    const [[a2], [b2]] = rate([[a1], [b1]], { tau: 0.01, limitSigma: true })
 
     expect(a2.sigma).toBeLessThanOrEqual(a1.sigma)
     expect([[a2], [b2]]).toStrictEqual([
@@ -96,7 +98,7 @@ describe('rate', () => {
     ])
   })
 
-  it('rate defaults to Thurstone-Mosteller full for teams with tau and prevent_sigma_increase', () => {
+  it('rate defaults to Thurstone-Mosteller full for teams with tau and limit_sigma', () => {
     const a1 = rating({ mu: 9.182, sigma: 0.0001 })
     const b1 = rating({ mu: 27.174, sigma: 4.922 })
     const c1 = rating({ mu: 16.672, sigma: 6.217 })
@@ -107,7 +109,7 @@ describe('rate', () => {
         [a1, b1],
         [c1, d1],
       ],
-      { tau: 0.01, preventSigmaIncrease: true }
+      { tau: 0.01, limitSigma: true }
     )
 
     expect(a2.sigma).toBeLessThanOrEqual(a1.sigma)
@@ -122,7 +124,7 @@ describe('rate', () => {
 
   it('reverses rank', () => {
     expect.assertions(1)
-    const [[loser], [winner]] = rate([[rating()], [rating()]], {
+    const [[loser], [winner]] = rate([[defaultRating()], [defaultRating()]], {
       rank: [2, 1],
     })
     expect([winner, loser]).toStrictEqual([
@@ -144,7 +146,7 @@ describe('rate', () => {
 
   it('accepts a misordered rank ordering', () => {
     expect.assertions(1)
-    const [[a], [b], [c], [d]] = rate([[d1], [d1], [d1], [d1]], {
+    const [[a], [b], [c], [d]] = rate([[defaultRating()], [defaultRating()], [defaultRating()], [defaultRating()]], {
       rank: [2, 1, 4, 3],
     })
     expect([a, b, c, d]).toStrictEqual([
@@ -221,7 +223,7 @@ describe('rate', () => {
 
   it('four-way-tie with newbies', () => {
     expect.assertions(1)
-    const [[a], [b], [c], [d]] = rate([[rating()], [rating()], [rating()], [rating()]], {
+    const [[a], [b], [c], [d]] = rate([[defaultRating()], [defaultRating()], [defaultRating()], [defaultRating()]], {
       rank: [1, 1, 1, 1],
     })
     expect([a, b, c, d]).toStrictEqual([
@@ -269,31 +271,6 @@ describe('rate', () => {
       { mu: 25.00008, sigma: 5.842372163080926 },
       { mu: 25.00008, sigma: 5.842372163080926 },
     ])
-  })
-
-  it('supports score transforms', () => {
-    expect.assertions(6)
-    const base = { model: thurstoneMostellerFull, score: [10, 5], scoreScale: 1 }
-    const [[logWinner], [logLoser]] = rate([[rating()], [rating()]], {
-      ...base,
-      scoreTransform: 'log',
-    })
-    const [[sqrtWinner], [sqrtLoser]] = rate([[rating()], [rating()]], {
-      ...base,
-      scoreTransform: 'sqrt',
-    })
-    const [[tanhWinner], [tanhLoser]] = rate([[rating()], [rating()]], {
-      ...base,
-      scoreTransform: 'tanh',
-      scoreSaturation: 6,
-    })
-
-    expect(logWinner.mu).toBeCloseTo(25)
-    expect(logLoser.mu).toBeCloseTo(24.283296212, 6)
-    expect(sqrtWinner.mu).toBeCloseTo(25)
-    expect(sqrtLoser.mu).toBeCloseTo(24.105572809, 6)
-    expect(tanhWinner.mu).toBeCloseTo(25)
-    expect(tanhLoser.mu).toBeCloseTo(24.727095284, 6)
   })
 
   it('accepts weights for partial play', () => {

@@ -1,6 +1,6 @@
 import { zip } from 'ramda'
 import constants from './constants'
-import { Rating, Options, Gamma, Team, Rank, ScoreToPerformance } from './types'
+import { Rating, Options, Gamma, Team, Rank } from './types'
 
 export type TeamMu = number
 
@@ -40,16 +40,22 @@ const teamRating =
   (options: Options) =>
   (game: Team[]): TeamRating[] => {
     const rank = rankings(game, options.rank)
-    return game.map((team, i) => [
-      // mu[i]
-      team.map(({ mu }) => mu).reduce(sum, 0),
-      // sigma^2[i]
-      team.map(({ sigma }) => sigma * sigma).reduce(sum, 0),
-      // (original team data)
-      team,
-      // rank[i]
-      rank[i],
-    ])
+    return game.map((team, i) => {
+      const synergy = options.synergy?.(team) ?? options.synergyInit?.(team)
+      const teamMu = team.map(({ mu }) => mu).reduce(sum, 0) + (synergy?.mu ?? 0)
+      const teamSigmaSq =
+        team.map(({ sigma }) => sigma * sigma).reduce(sum, 0) + (synergy?.sigma ? synergy.sigma * synergy.sigma : 0)
+      return [
+        // mu[i]
+        teamMu,
+        // sigma^2[i]
+        teamSigmaSq,
+        // (original team data)
+        team,
+        // rank[i]
+        rank[i],
+      ]
+    })
   }
 
 export const ladderPairs = <T>(ranks: T[]): T[][] => {
@@ -88,31 +94,6 @@ export const gamma = (options: Options): Gamma =>
   options.gamma ??
   // default to iSigma / c
   ((c: number, _k: number, _mu: number, sigmaSq: number, _team: Rating[], _qRank: number) => Math.sqrt(sigmaSq) / c)
-
-export const scoreToPerformance = (options: Options): ScoreToPerformance | undefined => {
-  if (options.scoreToPerformance) return options.scoreToPerformance
-  if (options.scoreTransform === undefined && options.scoreScale === undefined && options.scoreSaturation === undefined)
-    return undefined
-
-  const scale = options.scoreScale ?? 1
-  const saturation = options.scoreSaturation ?? 0
-  const tanh = (value: number) => {
-    const e2 = Math.exp(2 * value)
-    return (e2 - 1) / (e2 + 1)
-  }
-  const transform = options.scoreTransform ?? (saturation > 0 ? 'tanh' : 'linear')
-  if (transform === 'tanh') {
-    const g0 = saturation > 0 ? saturation : 1
-    return (gap: number, _options: Options) => scale * tanh(gap / g0)
-  }
-  if (transform === 'log') {
-    return (gap: number, _options: Options) => scale * Math.log(1 + gap)
-  }
-  if (transform === 'sqrt') {
-    return (gap: number, _options: Options) => scale * Math.sqrt(gap)
-  }
-  return (gap: number, _options: Options) => scale * gap
-}
 
 export default (options: Options) => ({
   utilC: utilC(options),

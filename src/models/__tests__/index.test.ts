@@ -1,4 +1,5 @@
-import { rate, rating } from '../..'
+import { rating } from '../..'
+import rate from '../../rate'
 import { thurstoneMostellerFull, thurstoneMostellerPart } from '..'
 
 // numbers in this test suite come from rank-1.02 on a 3-way

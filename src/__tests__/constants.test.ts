@@ -2,11 +2,11 @@ import constants from '../constants'
 
 describe('constants', () => {
   describe('z', () => {
-    it('defaults to 3', () => {
+    it('defaults to 2', () => {
       expect.assertions(1)
       const env = constants({})
       expect(env).toMatchObject({
-        Z: 3,
+        Z: 2,
       })
     })
     it('accepts z override', () => {
@@ -21,21 +21,21 @@ describe('constants', () => {
   })
 
   describe('mu', () => {
-    it('defaults to 25', () => {
+    it('defaults to 10', () => {
       expect.assertions(1)
       const env = constants({})
       expect(env).toMatchObject({
-        MU: 25,
+        MU: 10,
       })
     })
     it('accepts mu override', () => {
       expect.assertions(1)
       const env = constants({ mu: 300 })
       expect(env).toMatchObject({
-        BETA: 50,
-        BETASQ: 2500,
+        BETA: 75,
+        BETASQ: 5625,
         TAU: 1,
-        Z: 3,
+        Z: 2,
       })
     })
   })
@@ -43,7 +43,7 @@ describe('constants', () => {
   describe('tau', () => {
     it('is included in default export', () => {
       expect.assertions(1)
-      expect(constants({}).TAU).toBeCloseTo(0.08333333)
+      expect(constants({}).TAU).toBeCloseTo(0.03333333)
     })
     it('accepts tau override', () => {
       expect.assertions(1)
@@ -55,9 +55,9 @@ describe('constants', () => {
   })
 
   describe('sigma', () => {
-    it('defaults to 8.333333333333334', () => {
+    it('defaults to 5', () => {
       const env = constants({})
-      expect(env.SIGMA).toBeCloseTo(8.333333333333334)
+      expect(env.SIGMA).toBeCloseTo(5)
     })
     it('accepts sigma override', () => {
       expect.assertions(1)
@@ -87,10 +87,10 @@ describe('constants', () => {
   })
 
   describe('beta', () => {
-    it('defaults to 4.166666666666667', () => {
+    it('defaults to 2.5', () => {
       expect.assertions(1)
       const env = constants({})
-      expect(env.BETA).toBeCloseTo(4.166666666666667)
+      expect(env.BETA).toBeCloseTo(2.5)
     })
     it('accepts beta override', () => {
       expect.assertions(1)
@@ -103,10 +103,10 @@ describe('constants', () => {
   })
 
   describe('betaSq', () => {
-    it('defaults to 17.361111111111114', () => {
+    it('defaults to 6.25', () => {
       expect.assertions(1)
       const env = constants({})
-      expect(env.BETASQ).toBeCloseTo(17.361111111111114)
+      expect(env.BETASQ).toBeCloseTo(6.25)
     })
   })
 

@@ -1,4 +1,5 @@
-import { rate, rating } from '../..'
+import { rating } from '../..'
+import rate from '../../rate'
 import { thurstoneMostellerPart } from '..'
 
 // numbers in this test suite come from rank-1.02 based on 3 FFA games:

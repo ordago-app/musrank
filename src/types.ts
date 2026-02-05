@@ -9,10 +9,6 @@ export type Rank = number
 
 export type Gamma = (c: number, k: number, mu: number, sigmaSq: number, team: Rating[], qRank: number) => number
 
-export type ScoreTransform = 'linear' | 'log' | 'sqrt' | 'tanh'
-
-export type ScoreToPerformance = (gap: number, options: Options) => number
-
 export type Model = (teams: Team[], options?: Options) => Team[]
 
 export type Options = {
@@ -24,19 +20,17 @@ export type Options = {
   beta?: number
   beta0?: number
   betaPower?: number
-  matchLength?: number
-  matchRef?: number
+  matchPoints?: number
+  matchPointsRef?: number
   model?: Model
   rank?: Rank[]
   score?: number[]
-  scoreTransform?: ScoreTransform
-  scoreScale?: number
-  scoreSaturation?: number
-  scoreToPerformance?: ScoreToPerformance
+  synergy?: (team: Team) => Rating | undefined
+  synergyInit?: (team: Team) => Rating
+  onSynergyUpdate?: (team: Team, synergy: Rating) => void
   weight?: number[][]
   tau?: number
   alpha?: number
   target?: number
-  preventSigmaIncrease?: boolean // deprecated, use limitSigma, this will go away someday
   limitSigma?: boolean
 }

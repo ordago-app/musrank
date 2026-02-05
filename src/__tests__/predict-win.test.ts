@@ -3,7 +3,8 @@ import { rating, predictWin } from '..'
 describe('predictWin', () => {
   const precision = 7
 
-  const a1 = rating()
+  const baseRating = () => rating({ mu: 25, sigma: 25 / 3 })
+  const a1 = baseRating()
   const a2 = rating({ mu: 32.444, sigma: 5.123 })
 
   const b1 = rating({ mu: 73.381, sigma: 1.421 })

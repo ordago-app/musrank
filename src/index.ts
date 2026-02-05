@@ -1,6 +1,5 @@
 export { default as rating } from './rating'
-export { default as rate } from './rate'
+export { default as rate } from './rate-2v2'
 export { default as ordinal } from './ordinal'
 export { default as predictWin } from './predict-win'
-export { default as predictDraw } from './predict-draw'
 export * from './types'

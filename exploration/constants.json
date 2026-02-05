@@ -1,0 +1,30 @@
+[
+  {
+    "name": "mu-20-sigma-2.5",
+    "options": {
+      "mu": 20,
+      "sigma": 2.5
+    }
+  },
+  {
+    "name": "mu-20-sigma-5",
+    "options": {
+      "mu": 20,
+      "sigma": 5
+    }
+  },
+  {
+    "name": "mu-25-sigma-2.5",
+    "options": {
+      "mu": 15,
+      "sigma": 2.5
+    }
+  },
+  {
+    "name": "mu-15-sigma-5",
+    "options": {
+      "mu": 15,
+      "sigma": 5
+    }
+  }
+]
